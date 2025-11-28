@@ -87,11 +87,19 @@ random_acc, _ = experiment.run_experiment(strategy='random', n_iterations=10, ba
 # Uncertainty Sampling
 uncertainty_acc, _ = experiment.run_experiment(strategy='uncertainty', n_iterations=10, batch_size=5)
 
+# Least Confidence Sampling
+least_conf_acc, _ = experiment.run_experiment(strategy='least_confidence', n_iterations=10, batch_size=5)
+
+# Margin Sampling
+margin_acc, _ = experiment.run_experiment(strategy='margin', n_iterations=10, batch_size=5)
+
 # 📊 VISUALISATION
 plt.figure(figsize=(10,6))
 iterations = range(1, len(random_acc)+1)
 plt.plot(iterations, random_acc, label='Random Sampling', marker='o', linewidth=2)
 plt.plot(iterations, uncertainty_acc, label='Uncertainty Sampling', marker='x', linewidth=2)
+plt.plot(iterations, least_conf_acc, label='Least Confidence', marker='s', linewidth=2)
+plt.plot(iterations, margin_acc, label='Margin Sampling', marker='d', linewidth=2)
 plt.axhline(y=baseline_accuracy, color='r', linestyle='--', label=f'Baseline (10 samples)')
 plt.axhline(y=full_accuracy, color='g', linestyle='--', label=f'Full Data ({len(X_train)} samples)')
 plt.xlabel('Itérations')
