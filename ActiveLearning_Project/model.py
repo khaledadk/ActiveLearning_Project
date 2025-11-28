@@ -77,8 +77,13 @@ class ActiveLearningExperiment:
             
             if strategy == 'uncertainty':
                 selected = self.uncertainty_sampling(model, X_unlabeled, batch_size)
+            elif strategy == 'least_confidence':
+                selected = self.least_confidence_sampling(model, X_unlabeled, batch_size)
+            elif strategy == 'margin':
+                selected = self.margin_sampling(model, X_unlabeled, batch_size)
             else:
-                selected = self.random_sampling(X_unlabeled, batch_size)
+                 selected = self.random_sampling(X_unlabeled, batch_size)
+
             
             new_labeled_indices = [unlabeled_indices[i] for i in selected]
             labeled_indices.extend(new_labeled_indices)
@@ -95,3 +100,22 @@ class ActiveLearningExperiment:
         print(f"📈 Échantillons annotés totaux: {len(labeled_indices)}\n")
         
         return accuracies, len(labeled_indices)
+
+    def least_confidence_sampling(self, model, X_unlabeled, batch_size=10):
+        """Stratégie de type Least Confidence"""
+        probabilities = model.predict_proba(X_unlabeled)
+        # score = 1 - probabilité maximale
+        uncertainty = 1 - np.max(probabilities, axis=1)
+        selected_indices = np.argsort(uncertainty)[-batch_size:]
+        return selected_indices
+
+    def margin_sampling(self, model, X_unlabeled, batch_size=10):
+        """Stratégie de type Margin Sampling"""
+        probabilities = model.predict_proba(X_unlabeled)
+        # On trie par probas décroissantes pour obtenir p1 et p2
+        sorted_proba = np.sort(probabilities, axis=1)
+        p1 = sorted_proba[:, -1]   # meilleure classe
+        p2 = sorted_proba[:, -2]   # deuxième meilleure classe
+        margin = p1 - p2           # plus petit = plus ambigu
+        selected_indices = np.argsort(margin)[:batch_size]
+        return selected_indices
